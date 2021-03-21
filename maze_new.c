@@ -35,13 +35,29 @@ int findAmountMaze(FILE *fp) {
     return amount_mazes;
 }
 
-int findDirection(int *arr[], int row, int col) {
-    return 10;
+// main problem: find directions of maze
+int findDirection(int row_position, int col_position, SIZE size, int *(arr)[size.col]) {
+    if (row_position < 0 || row_position >= size.row || col_position >= size.col)
+        return 0;
+
+    if (arr[row_position][col_position] == 0)
+        return 0;
+
+    if ((row_position == size.row - 1) && (col_position == size.col - 1)) {
+        printf("Found the destination\n");
+        return 1;
+    }
+        
+    else {      // each up way, right way, left way 
+        return (findDirection(row_position - 1, col_position, size, arr) +
+               findDirection(row_position, col_position + 1, size, arr) +
+               findDirection(row_position + 1, col_position, size, arr));
+    }
 }
 
 int main() {
     // create file pointers
-    FILE *fp = fopen("data_structure_and_algorithm/input.txt", "r");
+    FILE *fp = fopen("data_structure_and_algorithm/input_ex.txt", "r");
     FILE *fp_out = fopen("data_structure_and_algorithm/output_ex.txt", "w");
 
     // initialization variables
@@ -52,6 +68,7 @@ int main() {
     char temp[DIRECTION_BUFFER_LENGTH] = {'\0', };
 
     SIZE size = {0, 0};
+    SIZE position = {0, 0};
     
     // get amount of all mazes
     if (ftell(fp) == 0)
@@ -109,7 +126,7 @@ int main() {
         buffer = NULL;
 
         // debug
-        printf("%d %d\n", size.row, size.col);
+        //printf("%d %d\n", size.row, size.col);
 
         // allocate dynamic memory of maze
         buffer = (char *)malloc(sizeof(char) * BUFFER_LENGTH);
@@ -139,15 +156,18 @@ int main() {
         }
 
         // debug code
+        /*
         for (int i = 0; i < size.row; i++) {
             for (int j = 0; j < size.col; j++) {
                 printf("%d ", arr[i][j]);
             }
             printf("\n");
         }
+        */
 
         // find a number of directions of the maze
-        result = findDirection(arr, size.row, size.col);
+        position.row = 0; position.col = 0;
+        result = findDirection(position.row, position.col, size, arr);
         
         // write a number of directions of the maze into output.txt
         sprintf(temp, "%d\n", result);
