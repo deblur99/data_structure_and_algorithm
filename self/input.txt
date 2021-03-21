@@ -1,0 +1,4 @@
+3
+Evaluate ( 3 + 5 ) * 2
+Swap "Alice" 010-1234-5678
+Count 123 4 567 89
