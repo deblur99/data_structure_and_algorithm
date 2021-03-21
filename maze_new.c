@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define BUFFER_LENGTH 2
+#define BUFFER_SIZE_LENGTH 20
+#define BUFFER_AMOUNT_MAZES_LEGNTH 5
+#define DIRECTION_BUFFER_LENGTH 10
+
 typedef struct size {
     int row;
     int col;
@@ -12,7 +17,7 @@ int findAmountMaze(FILE *fp) {
 
     int amount_mazes;
     char *buffer = (char *)malloc(sizeof(char));
-    char buffer_amount_mazes[5];
+    char buffer_amount_mazes[BUFFER_AMOUNT_MAZES_LEGNTH];
 
     fread(buffer, sizeof(char), 1, fp); 
     strcpy(buffer_amount_mazes, buffer);
@@ -30,16 +35,22 @@ int findAmountMaze(FILE *fp) {
     return amount_mazes;
 }
 
+int findDirection(int *arr[], int row, int col) {
+    return 10;
+}
+
 int main() {
     // create file pointers
     FILE *fp = fopen("data_structure_and_algorithm/input.txt", "r");
     FILE *fp_out = fopen("data_structure_and_algorithm/output_ex.txt", "w");
 
     // initialization variables
-    int amount_mazes = 0, directions = 0;
-    char *buffer = (char *)malloc(sizeof(char));
-    char *buffer_size = (char *)malloc(sizeof(char) * 20);
-    char *tok, *temp;
+    int amount_mazes = 0, directions = 0, result = 0;
+    char *buffer = NULL;
+    char *buffer_size = NULL;
+    char *tok;
+    char temp[DIRECTION_BUFFER_LENGTH] = {'\0', };
+
     SIZE size = {0, 0};
     
     // get amount of all mazes
@@ -56,7 +67,7 @@ int main() {
     // get size of maze
     while (amount_mazes > 0) {
         if (buffer == NULL)
-            buffer = (char *)malloc(sizeof(char) * 2);
+            buffer = (char *)malloc(sizeof(char) * BUFFER_LENGTH);
 
         amount_mazes--;
         size.row = 0; size.col = 0;
@@ -65,8 +76,9 @@ int main() {
         // and get integer values and put these into each members of struct size
         while (strcmp(buffer, "\r") != 0) {
             if (size.row == 0 || size.col == 0) {
-                memset(buffer_size, 0, sizeof(char) * 20);
-                memset(buffer, 0, sizeof(char) * 2);
+                buffer_size = (char *)malloc(sizeof(char) * BUFFER_SIZE_LENGTH);
+                memset(buffer_size, 0, sizeof(char) * BUFFER_SIZE_LENGTH);
+                memset(buffer, 0, sizeof(char) * BUFFER_LENGTH);
             }
 
             fread(buffer, sizeof(char), 1, fp);
@@ -90,13 +102,17 @@ int main() {
 
         fgetc(fp);
 
+        free(buffer_size);
         free(buffer);
+
+        buffer_size = NULL;
+        buffer = NULL;
 
         // debug
         printf("%d %d\n", size.row, size.col);
 
         // allocate dynamic memory of maze
-        buffer = (char *)malloc(sizeof(char) * 2);
+        buffer = (char *)malloc(sizeof(char) * BUFFER_LENGTH);
         int **arr = (int **)malloc(sizeof(int *) * size.row);
 
         for (int i = 0; i < size.row; i++) {
@@ -130,6 +146,15 @@ int main() {
             printf("\n");
         }
 
+        // find a number of directions of the maze
+        result = findDirection(arr, size.row, size.col);
+        
+        // write a number of directions of the maze into output.txt
+        sprintf(temp, "%d\n", result);
+        fwrite(temp, sizeof(char), strlen(temp), fp_out);
+
+        memset(temp, 0, DIRECTION_BUFFER_LENGTH);
+
         // free the maze array
         for (int i = 0; i < size.row; i++) {
             free(arr[i]);
@@ -138,11 +163,13 @@ int main() {
         free(arr);
         free(buffer);
 
+        arr = NULL;
         buffer = NULL;
     }
 
-    free(buffer_size);
     free(buffer);
+    buffer = NULL;
+
     fclose(fp_out);
     fclose(fp);
 
