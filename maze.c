@@ -48,33 +48,137 @@ int findDirection(int row_position, int col_position, SIZE size, int *(arr)[size
         // 이전에 아래에서 올라온 경우: 아래로 다시 갈 수 없으므로 위쪽 또는 오른쪽으로 진행 가능
         // 이전에 왼쪽에서 오른쪽으로 온 경우: 왼쪽으로 가는 동작은 없으므로 위쪽 또는 오른쪽 또는 아래쪽으로 진행 가능
 
-    if (row_position < 0 || row_position == size.row || col_position == size.col)
+    // 현위치가 배열의 위치를 벗어난 경우 0 반환
+    if (row_position < 0 || row_position >= size.row || col_position >= size.col)
+
         return 0;
 
+    // 현위치가 0일 경우 갈 수 없는 위치이므로 0 반환
     if (arr[row_position][col_position] == 0)
+
         return 0;
 
-    if ((row_position == size.row - 1) && (col_position == size.col - 1)) {
-        return 1;
-    }
+    // 현위지의 값이 1이며 목적지에 도달한 경우 1 반환
+    if ((arr[row_position][col_position] == 1) && (row_position == size.row - 1) && (col_position == size.col - 1))
 
-    if (pre_row_compare - 1 == row_position)
-        return (findDirection(row_position - 1, col_position, size, arr, row_position) +
-                findDirection(row_position, col_position + 1, size, arr, row_position));
-    else if (pre_row_compare + 1 == row_position)
+        return 1;
+    
+    if ((row_position - 1) < 0) {
+
         return (findDirection(row_position, col_position + 1, size, arr, row_position) +
                 findDirection(row_position + 1, col_position, size, arr, row_position));
-    else
-        // each function call means going up, going right, going down
-        return (findDirection(row_position - 1, col_position, size, arr, row_position) +
-                findDirection(row_position, col_position + 1, size, arr, row_position) +
-                findDirection(row_position + 1, col_position, size, arr, row_position)); 
+    }
+
+    else if ((row_position + 1) >= size.row) {
+
+        return 0;
+    }
+
+    else if ((col_position + 1) >= size.col) {
+
+        return 0;
+    }
+
+    // 이전에 위쪽으로 간 경우
+    if (row_position + 1 == pre_row_compare) {
+        
+        // 바로 위가 0일 경우 오른쪽으로만 가능
+        if (arr[row_position - 1][col_position] == 0)
+            return findDirection(row_position, col_position + 1, size, arr, row_position);
+
+        // 바로 오른쪽이 0일 경우 위쪽으로만 가능
+        else if (arr[row_position][col_position + 1] == 0)
+            return findDirection(row_position - 1, col_position, size, arr, row_position);
+        
+        // 바로 위, 오른쪽이 모두 0이 아닐 경우 양쪽으로 이동
+        else
+            return (findDirection(row_position - 1, col_position, size, arr, row_position) +
+                    findDirection(row_position, col_position + 1, size, arr, row_position));
+    }
+        
+    // 이전에 아래쪽으로 간 경우
+    else if (row_position - 1 == pre_row_compare) { 
+        // 바로 아래가 0일 경우 오른쪽으로만 가능
+        if (arr[row_position + 1][col_position] == 0)
+            return findDirection(row_position, col_position + 1, size, arr, row_position);
+
+        // 바로 오른쪽이 0일 경우 아래쪽으로만 가능
+        else if (arr[row_position][col_position + 1] == 0)
+            return findDirection(row_position + 1, col_position, size, arr, row_position);
+
+        // 바로 아래, 오른쪽이 0일 경우 양쪽으로 이동
+        else
+            return (findDirection(row_position + 1, col_position, size, arr, row_position) +
+                    findDirection(row_position, col_position + 1, size, arr, row_position));
+    }
+
+    // 이전에 오른쪽으로 간 경우
+    else {
+        // 바로 위쪽이 0일 경우
+        if (arr[row_position - 1][col_position] == 0) {
+
+            // 바로 위쪽, 오른쪽이 0일 경우 아래쪽으로만 가능
+            if (arr[row_position][col_position + 1] == 0)
+                return findDirection(row_position + 1, col_position, size, arr, row_position);
+
+            // 바로 위쪽, 아래쪽이 0일 경우 오른쪽으로만 가능
+            else if (arr[row_position + 1][col_position] == 0)
+                return findDirection(row_position, col_position + 1, size, arr, row_position);
+
+            // 바로 위쪽만 0일 경우 오른쪽, 아래쪽 양쪽으로 이동
+            else
+                return (findDirection(row_position, col_position + 1, size, arr, row_position) +
+                        findDirection(row_position + 1, col_position, size, arr, row_position));
+        }
+             
+        // 바로 오른쪽이 0일 경우
+        else if (arr[row_position][col_position + 1] == 0) {
+
+            // 바로 위쪽, 오른쪽이 0일 경우 아래쪽으로만 가능
+            if (arr[row_position - 1][col_position] == 0)
+                return findDirection(row_position + 1, col_position, size, arr, row_position);
+
+            // 바로 오른쪽, 아래쪽이 0일 경우 위쪽으로만 가능
+            else if (arr[row_position + 1][col_position] == 0)
+                return findDirection(row_position - 1, col_position, size, arr, row_position);
+
+            // 바로 오른쪽만 0일 경우 위쪽, 아래쪽 양쪽으로 이동
+            else
+                return (findDirection(row_position - 1, col_position, size, arr, row_position) +
+                        findDirection(row_position + 1, col_position, size, arr, row_position));
+        }
+
+        // 바로 아래쪽이 0일 경우
+        else if (arr[row_position + 1][col_position] == 0) {
+
+            // 바로 위쪽, 아래쪽이 0일 경우 오른쪽으로만 가능
+            if (arr[row_position - 1][col_position] == 0)
+                return findDirection(row_position, col_position + 1, size, arr, row_position);
+
+            // 바로 오른쪽, 아래쪽이 0일 경우 위쪽으로만 가능
+            else if (arr[row_position][col_position + 1] == 0)
+                return findDirection(row_position - 1, col_position, size, arr, row_position);
+
+            // 바로 아래쪽만 0일 경우 위쪽, 오른쪽 양쪽으로 이동
+            else
+                return (findDirection(row_position - 1, col_position, size, arr, row_position) +
+                        findDirection(row_position, col_position + 1, size, arr, row_position));
+        }
+
+        // 바로 위쪽, 오른쪽, 아래쪽이 모두 0이 아닐 경우 세 방향으로 이동
+        else {
+
+            return (findDirection(row_position - 1, col_position, size, arr, row_position) +
+                    findDirection(row_position, col_position + 1, size, arr, row_position) +
+                    findDirection(row_position + 1, col_position, size, arr, row_position));
+        }
+    }        
 }
 
 int main() {
     // create file pointers
-    FILE *fp = fopen("data_structure_and_algorithm/input_ex.txt", "r");
-    FILE *fp_out = fopen("data_structure_and_algorithm/output.txt", "w");
+    FILE *fp = fopen("data_structure_and_algorithm/input.txt", "r");
+    FILE *fp_out = fopen("data_structure_and_algorithm/output_ex.txt", "w");
 
     // initialization variables
     int amount_mazes = 0, directions = 0;
@@ -178,6 +282,10 @@ int main() {
         // find a number of directions of the maze
         position.row = 0; position.col = 0;
         result = findDirection(position.row, position.col, size, arr, 0);
+
+        // if result exceeds to 1000000, change it 1000000
+        if (result > 1000000)
+            result = 1000000;
 
         // write a number of directions of the maze into output.txt
         sprintf(temp, "%d\n", result);
