@@ -39,3 +39,6 @@ basic logic
  1) if (arr[row - 1][col] == 1) then position = arr[row - 1][col];
  2) if (arr[row][col + 1] == 1) then position = arr[row][col + 1];
  3) if (arr[row + 1][col] == 1) then position = arr[row + 1][col];
+
+4. 일단 0, 1과는 상관없이 다 호출해 놓고, 처리할 때 0이 포함된 부분이 있으면 0을 반환함
+4-1) 0이 포함된 부분이 없다면 전체 개수에서 1을 누적함
