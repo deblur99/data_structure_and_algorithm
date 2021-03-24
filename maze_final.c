@@ -42,16 +42,7 @@ int findAmountMaze(FILE *fp) {
 // from the solution of task 1
 int isExistPath(int row_position, int col_position, int row_size, int col_size, int *(arr)[col_size]) {
 
-    // Idea:
-        // 위->아래->위 (0, 0), 0 -> (1, 0), 0 -> (0, 0), 1
-        // 아래->위->아래 (1, 1), 2 -> (0, 1), 1 -> (1, 1), 0
-        // 이전 단계의 row만 볼 수 있음 -> 핵심은 현 단계 row와 이전의 이전 단계 row의 비교
-
-        // 이미 지나간 경로로 가지 않기 위한 규칙
-        // 이전에 위에서 내려온 경우: 위로 다시 갈 수 없으므로 오른쪽 또는 아래쪽으로 진행 가능
-        // 이전에 아래에서 올라온 경우: 아래로 다시 갈 수 없으므로 위쪽 또는 오른쪽으로 진행 가능
-        // 이전에 왼쪽에서 오른쪽으로 온 경우: 왼쪽으로 가는 동작은 없으므로 위쪽 또는 오른쪽 또는 아래쪽으로 진행 가능
-
+    // base case: exceptions
     if (row_position < 0)
         return 0;
 
@@ -61,12 +52,15 @@ int isExistPath(int row_position, int col_position, int row_size, int col_size, 
     if (arr[row_position][col_position] == 0)
         return 0;
 
+    // base case: when destination arrived
     if ((arr[row_position][col_position] == 1) && (row_position == row_size - 1) && (col_position == col_size - 1)) {
         return 1;
     }
     
+    // let arrived point is 2. if there is arrived point, it will be changed into 2 from 1
+    // and when other ways go to a point which indicates 0, then return 0
     if (arr[row_position][col_position] != 2) {
-        arr[row_position][col_position] = 2; // already went
+        arr[row_position][col_position] = 2;
         
         // each function call means going up, going right, going down
         return (isExistPath(row_position - 1, col_position, row_size, col_size, arr) +
@@ -77,10 +71,7 @@ int isExistPath(int row_position, int col_position, int row_size, int col_size, 
     }
 }
 
-// main problem: find directions of maze
-int findDirection(int row_position, int col_position, int row_size, int col_size, int *(arr)[col_size], bool cameFromUp, bool cameFromDown) {
-
-   // Idea:
+// Idea:
         // 위->아래->위 (0, 0), 0 -> (1, 0), 0 -> (0, 0), 1
         // 아래->위->아래 (1, 1), 2 -> (0, 1), 1 -> (1, 1), 0
         // 이전 단계의 row만 볼 수 있음 -> 핵심은 현 단계 row와 이전의 이전 단계 row의 비교
@@ -88,17 +79,17 @@ int findDirection(int row_position, int col_position, int row_size, int col_size
         // 정방향으로 간다고 했을 때는 위쪽과 아래쪽으로 확인하는데, 이럴 경우 위로 갔다가 아래로 가거나 그 반대 방향일 때
         // 무한정 호출하는 경우가 발생하여 프로그램이 멈춘다.
 
-        // 따라서 다음과 같은 아이디어로 알고리즘을 구현하였다.
-        // 출발지에서 도착지로 가는 방향과 정반대로, 도착지에서 출발하여 출발지에 도착하는 것을 경로 1개로 침
-        // 이처럼 반대로 간다면, 출발지에서 도착지까지 위쪽-오른쪽-아래쪽 3개 방향이 위쪽-왼쪽 2개 방향으로 줄어듦
-        // 또한, 도착지 근처에 있는 0을 빠르게 발견하면, 0을 반환함으로써 처리 시간을 대폭 줄일 수 있음
+// main problem: find directions of maze
+int findDirection(int row_position, int col_position, int row_size, int col_size, int *(arr)[col_size], bool cameFromUp, bool cameFromDown) {
 
+    // base case:
     // if result exceeds to 1000000, change it 1000000
     if (result >= 1000000) {
         result = 1000000;
         return 0;
     }
 
+    // base case: exceptions
     if ((row_position < 0) || (col_position < 0))
         return 0;
 
@@ -108,19 +99,25 @@ int findDirection(int row_position, int col_position, int row_size, int col_size
     if (arr[row_position][col_position] == 0)
         return 0;
 
+    // base case: when points arrive to destination
     if ((arr[row_position][col_position] == 1) && (row_position == (row_size - 1)) && (col_position == (col_size - 1))) {
         result++;
-        return 1;
+        return 0;
     }        
 
+    // movement case 1: when formal sequence was up-side from here, now the sequence cannot go up-side
+    // In this case, it must go right-side or down-side.
     if (cameFromUp)
         return (findDirection(row_position + 1, col_position, row_size, col_size, arr, true, false) +
                 findDirection(row_position, col_position + 1, row_size, col_size, arr, false, false));
 
+    // movement case 2: when formal sequence was down-side from here, now the sequence cannot go down-side
+    // In this case, it must go up-side or right-side.
     else if (cameFromDown) 
         return (findDirection(row_position - 1, col_position, row_size, col_size, arr, false, true) +
                 findDirection(row_position, col_position + 1, row_size, col_size, arr, false, false));
 
+    // movement case 3: when formal sequence was right-side from here, now the sequence can go anywhere except left-side
     else 
         return (findDirection(row_position - 1, col_position, row_size, col_size, arr, false, true) +
                 findDirection(row_position, col_position + 1, row_size, col_size, arr, false, false) +
