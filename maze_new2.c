@@ -36,44 +36,117 @@ int findAmountMaze(FILE *fp) {
 }
 
 // main problem: find directions of maze
-int findDirection(int row_position, int col_position, SIZE size, int *(arr)[size.col], int pre_row_compare) {
+int findDirection(int row_position, int col_position, SIZE size, int *(maze)[size.col], int pre_row_compare) {
 
     // Idea:
         // 위->아래->위 (0, 0), 0 -> (1, 0), 0 -> (0, 0), 1
         // 아래->위->아래 (1, 1), 2 -> (0, 1), 1 -> (1, 1), 0
         // 이전 단계의 row만 볼 수 있음 -> 핵심은 현 단계 row와 이전의 이전 단계 row의 비교
 
-        // 이미 지나간 경로로 가지 않기 위한 규칙
+        // 이전에 탐색한 위치를 바탕으로 진행 방향 결정
         // 이전에 위에서 내려온 경우: 위로 다시 갈 수 없으므로 오른쪽 또는 아래쪽으로 진행 가능
         // 이전에 아래에서 올라온 경우: 아래로 다시 갈 수 없으므로 위쪽 또는 오른쪽으로 진행 가능
         // 이전에 왼쪽에서 오른쪽으로 온 경우: 왼쪽으로 가는 동작은 없으므로 위쪽 또는 오른쪽 또는 아래쪽으로 진행 가능
 
-    if (row_position < 0 || row_position == size.row || col_position == size.col)
+    // 이탈 방지
+    if ((row_position < 0) || (row_position >= size.row))
         return 0;
 
-    if (arr[row_position][col_position] == 0)
+    if ((col_position < 0) || (col_position >= size.col))
         return 0;
 
-    if ((row_position == size.row - 1) && (col_position == size.col - 1)) {
-        return 1;
+    // 목적지 도달 조건
+    if (maze[row_position][col_position] == 1) {
+
+        if ((row_position == (size.row - 1) && (col_position == (size.col - 1)))) {
+            return 1;
+        }
     }
 
-    if (pre_row_compare - 1 == row_position)
-        return (findDirection(row_position - 1, col_position, size, arr, row_position) +
-                findDirection(row_position, col_position + 1, size, arr, row_position));
-    else if (pre_row_compare + 1 == row_position)
-        return (findDirection(row_position, col_position + 1, size, arr, row_position) +
-                findDirection(row_position + 1, col_position, size, arr, row_position));
-    else
-        // each function call means going up, going right, going down
-        return (findDirection(row_position - 1, col_position, size, arr, row_position) +
-                findDirection(row_position, col_position + 1, size, arr, row_position) +
-                findDirection(row_position + 1, col_position, size, arr, row_position)); 
+    // 0인 지점 탐색하기
+    // 위쪽
+    if ((row_position - 1) >= 0) {
+
+        if (maze[row_position - 1][col_position] == 0) {
+            if ((pre_row_compare - 1) == row_position) {
+                return (findDirection(row_position, col_position + 1, size, maze, row_position));
+            }
+        
+            else if ((pre_row_compare + 1) == row_position) {
+                return (findDirection(row_position, col_position + 1, size, maze, row_position) +
+                        findDirection(row_position + 1, col_position, size, maze, row_position));
+            }
+       
+            else {
+                return (findDirection(row_position, col_position + 1, size, maze, row_position) +
+                        findDirection(row_position + 1, col_position, size, maze, row_position)); 
+            }
+        }
+    }
+
+    // 아래쪽
+    else if ((row_position + 1) < size.row) {
+
+        if (maze[row_position + 1][col_position] == 0) {
+            if ((pre_row_compare - 1) == row_position) {
+                return (findDirection(row_position - 1, col_position, size, maze, row_position) +
+                        findDirection(row_position, col_position + 1, size, maze, row_position));
+            }
+        
+            else if ((pre_row_compare + 1) == row_position) {
+                return findDirection(row_position, col_position + 1, size, maze, row_position);
+            }
+       
+            else {
+                return (findDirection(row_position - 1, col_position, size, maze, row_position) +
+                        findDirection(row_position, col_position + 1, size, maze, row_position)); 
+            }
+        }
+    }
+
+    // 오른쪽
+    else if ((col_position + 1) < size.col) {
+
+        if (maze[row_position][col_position + 1] == 0) {
+            if ((pre_row_compare - 1) == row_position) {
+                return findDirection(row_position - 1, col_position, size, maze, row_position);
+            }
+        
+            else if ((pre_row_compare + 1) == row_position) {
+                return findDirection(row_position + 1, col_position, size, maze, row_position);
+            }
+       
+            else {
+                return (findDirection(row_position - 1, col_position, size, maze, row_position) +
+                        findDirection(row_position + 1, col_position, size, maze, row_position)); 
+            }
+        }
+    }
+    
+    // 왼쪽, 오른쪽, 아래쪽이 모두 1인 경우
+    else {
+
+        if ((pre_row_compare - 1) == row_position) {
+            return (findDirection(row_position - 1, col_position, size, maze, row_position) +
+                    findDirection(row_position, col_position + 1, size, maze, row_position));
+        }
+
+        else if ((pre_row_compare + 1) == row_position) {
+            return (findDirection(row_position, col_position + 1, size, maze, row_position) +
+                    findDirection(row_position + 1, col_position, size, maze, row_position));
+        }
+
+        else {
+            return (findDirection(row_position - 1, col_position, size, maze, row_position) +
+                    findDirection(row_position, col_position + 1, size, maze, row_position) +
+                    findDirection(row_position + 1, col_position, size, maze, row_position)); 
+        }
+    }
 }
 
 int main() {
     // create file pointers
-    FILE *fp = fopen("data_structure_and_algorithm/input_ex.txt", "r");
+    FILE *fp = fopen("data_structure_and_algorithm/input.txt", "r");
     FILE *fp_out = fopen("data_structure_and_algorithm/output.txt", "w");
 
     // initialization variables
@@ -169,6 +242,7 @@ int main() {
             fgetc(fp);
         }        
 
+        // debug
         for (int i = 0; i < size.row; i++) {
             for (int j = 0; j < size.col; j++)
                 printf("%d ", arr[i][j]);
@@ -178,6 +252,9 @@ int main() {
         // find a number of directions of the maze
         position.row = 0; position.col = 0;
         result = findDirection(position.row, position.col, size, arr, 0);
+
+        if (result > 1000000)
+            result = 1000000;
 
         // write a number of directions of the maze into output.txt
         sprintf(temp, "%d\n", result);

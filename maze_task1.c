@@ -75,8 +75,8 @@ int findDirection(int row_position, int col_position, SIZE size, int *(arr)[size
 
 int main() {
     // create file pointers
-    FILE *fp = fopen("data_structure_and_algorithm/input.txt", "r");
-    FILE *fp_out = fopen("data_structure_and_algorithm/output.txt", "w");
+    FILE *fp = fopen("./input.txt", "r");
+    FILE *fp_out = fopen("./output.txt", "w");
 
     // initialization variables
     int amount_mazes = 0, directions = 0;
