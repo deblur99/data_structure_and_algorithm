@@ -126,8 +126,8 @@ int findDirection(int row_position, int col_position, int row_size, int col_size
 
 int main() {
     // create file pointers
-    FILE *fp = fopen("data_structure_and_algorithm/input.txt", "r");
-    FILE *fp_out = fopen("data_structure_and_algorithm/output.txt", "w");
+    FILE *fp = fopen("data_structure_and_algorithm/recursion/input.txt", "r");
+    FILE *fp_out = fopen("data_structure_and_algorithm/recursion/output.txt", "w");
 
     // initialization variables
     int isExist = 0;
