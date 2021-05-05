@@ -142,6 +142,9 @@ int main() {
     DATA retrieved = queueRear(queue);
     printf("Age: %d, Name: %s\n", retrieved.age, retrieved.name);    
 
+    retrieved = queueFront(queue);
+    printf("Age: %d, Name: %s\n", retrieved.age, retrieved.name); 
+
     printf("current count: %d\n", queue->count);
 
     retrieved = dequeue(queue);

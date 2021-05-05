@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 5
+#define MAX 10
 
 typedef struct _DATA {
     int num;
@@ -90,6 +90,14 @@ void insertMiddleNode(HEAD *head, NODE *pre, DATA data) {
     }
 
     return;
+}
+
+void insertNode(HEAD *head, DATA data) {
+    if (head->count == 0)
+        insertFirstNode(head, data);
+    
+    else if (head->count < MAX)
+        insertLastNode(head, data);
 }
 
 NODE* searchNode(HEAD *head, int find) {
