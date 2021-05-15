@@ -7,10 +7,14 @@
 #define ARR_SIZE 100
 #define BUFFER_SIZE 10
 
-typedef struct _TYPE {
+typedef enum _TYPE {
+    DFS = 0, BFS
+}TYPE;
+
+typedef struct _INFO {
     int seek;
     int location;
-}TYPE;
+}INFO;
 
 typedef struct _NODE {
     int data;
@@ -19,7 +23,11 @@ typedef struct _NODE {
     struct _NODE *right;
 }NODE;
 
-NODE tree[ARR_SIZE];
+NODE tree[ARR_SIZE];    // declare BST
+int dfs_index;
+
+NODE *queue[ARR_SIZE];  // declare queue for BFS
+int front, rear;
 
 // functions which handle the tree
 void init() {
@@ -81,7 +89,89 @@ void printTree(int index) {
     }
 }
 
+// using preorder method
+int dfs(int index, int target) {
+    // 호출할 때마다 dfs_index 전역 변수를 1 증가시킨다.
+    // 좌측 탐색 + 우측 탐색 순으로 재귀호출하여 좌측이 우선적으로
+    // 탐색되어야 정확하게 구할 수 있다.
+    // 또한, 정수값을 반환해야 하므로, 각 호출은 return문으로 이루어져야 한다.
+    // case 1) 좌측, 우측 서브트리가 비어있지 않을 경우: 좌측 -> 우측 순으로 탐색
+    // case 2) 좌측 서브트리만 비어있지 않을 경우: 좌측만 탐색
+    // case 3) 우측 서브트리만 비어있지 않을 경우: 우측만 탐색
+    dfs_index++;
 
+    // base case
+    if (dfs_index == target) {
+        return tree[index].data;
+    }
+
+    if (tree[index].valid != 0) {
+        // general case
+        if (tree[index].left != NULL) {
+            if (tree[index].right != NULL)
+                return dfs(index * 2 + 1, target) + dfs(index * 2 + 2, target); 
+            else
+                return dfs(index * 2 + 1, target);
+        }
+
+        else {
+            if (tree[index].right != NULL)
+                return dfs(index * 2 + 2, target);
+        }
+    }
+}
+
+// functions of handling queue for bfs
+void initQueue() {
+    for (int i = 0; i < ARR_SIZE; i++) {
+        queue[i] = NULL;
+    }
+    front = rear = -1;
+}
+
+void enqueue(NODE *node) {
+    queue[++rear] = node;
+    if (front == -1) front++;
+}
+
+NODE* dequeue() {
+    NODE *node = queue[front];
+    if (front == rear)
+        front = rear = -1;
+    else front++;
+    return node;
+}
+
+int isEmpty() {
+    if (front == rear == -1) return 1;
+    return 0;
+}
+
+int bfs(int bfs_index, int target) {
+    if (bfs_index == target == 1)
+        return tree[0].data;
+
+    NODE *currentNode = &tree[0];   // initialization
+    initQueue();
+    while (currentNode != NULL) {
+        if (currentNode->left != NULL)
+            enqueue(currentNode->left);
+        
+        if (currentNode->right != NULL)
+            enqueue(currentNode->right);
+        
+        if (isEmpty())
+            currentNode = NULL;
+        
+        else {
+            bfs_index++;
+            currentNode = dequeue();
+
+            if (bfs_index == target)
+                return currentNode->data;
+        }
+    }
+} 
 
 // parsing functions
 int getAmountofTrees(FILE *fp) {
@@ -101,8 +191,8 @@ int getAmountofNodes(FILE *fp) {
     return num;
 }
 
-TYPE getType(FILE *fp) {
-    TYPE result = {0, -1};
+INFO getInfo(FILE *fp) {
+    INFO result = {0, -1};
     int isEqual = 0, index = 0;
     char key[3] = {'\n', };
     char buffer[BUFFER_SIZE];
@@ -148,27 +238,38 @@ int main() {
 
     TYPE processType;
 
+    INFO processInfo;
+
     // initialize int type variables
     int amountOfTrees = getAmountofTrees(fp);
-    int amountOfNodes = 0, element = 0;
+    int amountOfNodes = 0, element = 0, result = 0;
 
 
     for (int i = 0; i < amountOfTrees; i++) {  // get amount of Nodes and type of processing
         amountOfNodes = getAmountofNodes(fp);
-        processType = getType(fp);  // this can be 0 or 1. 0 means dfs, 1 means bfs.
-        printf("\n%d %d\n", processType.seek, processType.location);
+        processInfo = getInfo(fp);      // processInfo.seek can be 0 or 1. 0 means dfs, 1 means bfs.
+        processType = processInfo.seek; // mapping 0 to DFS, 1 to BFS
+
         // init the tree
         init();
 
-        // iterate like the number of nodes
+        // iterate along the number of nodes
         for (int j = 0; j < amountOfNodes; j++) {
             element = getData(fp);
             addNode(0, element);
         }
 
-        // debug
-        printTree(0);
-        printf("\n");
+        // search by DFS or BFS
+        if (processType == DFS) {
+            dfs_index = 0;
+            result = dfs(0, processInfo.location);  
+        }
+
+        else if (processType == BFS)
+            result = bfs(1, processInfo.location);
+
+        // save the result into output
+        fprintf(fp2, "%d\n", result);
     }
 
     fclose(fp2);
