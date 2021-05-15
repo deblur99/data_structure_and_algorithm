@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX 12
 #define ARR_SIZE 100
 #define BUFFER_SIZE 10
 
