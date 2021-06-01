@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 60
+#define MAX 50
 
 int visited[MAX];
 
