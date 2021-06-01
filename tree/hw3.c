@@ -66,6 +66,7 @@ void addNode(int index, int data) {
     return;
 }
 
+//debug
 void printTree(int index) {
     // base case
     if (tree[index].valid == 0) {
@@ -123,7 +124,7 @@ int dfs(int index, int target) {
 // functions of handling queue for bfs
 void initQueue() {
     for (int i = 0; i < ARR_SIZE; i++) {
-        queue[i] = NULL;
+        queue[i] = NULL;    
     }
     front = rear = -1;
 }
