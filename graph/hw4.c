@@ -53,15 +53,29 @@ int getValue(FILE *fp) {
 }
 
 int findCycleByDFS(int **graph, int size, int init) {
-    int isConnected = 0;
+    int isConnected = 0, invalid = 0;
     int idxPrev = -1;
 
     // DFS에서 첫 번째로 탐색할 정점 찾기
     // 최초로 탐색할 정점에 인접한 정점이 없을 경우, 다음 값을 init으로 대체한다.
     while (!isConnected) {
         for (int i = 0; i < size; i++) {
+            invalid = 0;
             for (int j = 0; j < size; j++) {
                 if (graph[i][j] == 1) {
+                    for (int k = 0; k < size; k++) {
+                        if (graph[j][k] == 1) {
+                            break;
+                        }
+                        else {
+                            if (k == size - 1)
+                                invalid = 1;
+                        }
+                    }
+                    
+                    if (invalid)
+                        break;
+
                     init = i;
                     isConnected = 1;
                     break;
