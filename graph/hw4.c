@@ -13,6 +13,7 @@ int top = -1;
 
 void init() {
     top = -1;
+
     for (int i = 0; i < MAX; i++) {
         stack[i] = -1;
         visited[i] = 0;
@@ -25,6 +26,7 @@ void push(int index) {
         return;
     
     stack[++top] = index;
+
     return;
 }
 
@@ -46,12 +48,15 @@ int isEmpty() {
 int getValue(FILE *fp) {
     int result = -1;
     fscanf(fp, "%d", &result);
+
     return result;
 }
 
 int findCycleByDFS(int **graph, int size, int init) {
-    int isConnected = 0, idxPrev = -1, result = 0;
+    int isConnected = 0;
+    int idxPrev = -1;
 
+    // DFS에서 첫 번째로 탐색할 정점 찾기
     // 최초로 탐색할 정점에 인접한 정점이 없을 경우, 다음 값을 init으로 대체한다.
     while (!isConnected) {
         for (int i = 0; i < size; i++) {
@@ -83,30 +88,40 @@ int findCycleByDFS(int **graph, int size, int init) {
         if (visited[idx] == 0) {
             visited[idx] = 1;
         }
-
-        for (int i = size - 1; i >= 0; i--) {
-
+        
+        for (int i = 0; i < size; i++) {
+            // 행렬의 요소가 1인 경우, 해당 정점이 인덱스에 해당하는 정점을 가리킴
             if (graph[idx][i] == 1) {
-                if (visited[i] == 0)
+                // 중요한 것은, 현재 정점이 무엇을 가리키느냐다!
+                // 현재 정점이 방문한 정점을 가리키는 경우, 사이클이 존재함
+                // 그 이유는, DFS로 탐색할 때는 중간에 끊어지지 않고 이어서 탐색하기 때문에
+                // 현재 정점이 이미 DFS로 순회한 정점 중 아무거나 가리키면 Cycle이라고 할 수 있기 때문이다.
+
+                // 방문하지 않은 정점을 가리키는 경우, 그 정점을 스택에 저장
+                if (visited[i] == 0) {
                     push(i);
+                }
                 
-                else {
-                    for (int j = idxPrev; j >= 0; j--) {
-                        if (i == prevList[j] && i - j > 1) {
-                            result++;
-                        }
+                // 이미 방문한 정점을 가리키는 경우, 이전에 저장된 스택의 요소를 확인하고
+                // 요소에 해당하는 정점과 일치하면 Cycle로 간주하여 1 반환
+                if (visited[i] == 1) {
+                    for (int j = 0; j <= idxPrev; j++) {
+                        if (prevList[j] == i)
+                            return 1;
                     }
                 }
             }
         }
     }
 
-    return result;
+    return 0;
 }
 
 int main() {
+
     int amountOfGraph = 0;
     int sizeOfGraph = 0, result;
+
     FILE *fp = fopen("data_structure_and_algorithm/graph/input.txt", "r");
     FILE *fp2 = fopen("data_structure_and_algorithm/graph/output.txt", "w");
 
@@ -114,6 +129,7 @@ int main() {
 
     // iterate and process for each graphs
     for (int i = 0; i < amountOfGraph; i++) {
+
         result = 0;
         sizeOfGraph = getValue(fp);
 
@@ -126,6 +142,7 @@ int main() {
 
         // get all of elements of the graph and make nodes
         for (int j = 0; j < sizeOfGraph; j++) {
+
             for (int k = 0; k < sizeOfGraph; k++) {
                 graph[j][k] = getValue(fp);
             }
